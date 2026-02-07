@@ -34,7 +34,7 @@ do
      )
   fi
 
-    echo "IP Address: $IP"
+    echo "IP Address $instance: $IP"
     RECORD_NAME="$instance.$DOMAIN"  # mongodb.agrigrow.online
 
 
