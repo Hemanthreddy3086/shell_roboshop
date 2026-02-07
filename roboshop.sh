@@ -1,20 +1,17 @@
- #!/bin/bash
-
+#!/bin/bash
+set -e
 SG_ID="sg-047414b5251141a52"
 AMI_ID="ami-0220d79f3f480ecf5"
 ZONE_ID="Z071611922ZYBGR7XJDHT"
 DOMAIN="agrigrow.online"
-# Create a new EC2 instance
 
-
-for instance in $@
-do  
-
+for instance in "$@"; do
     echo "Processing instance: $instance"
 
     EXISTING_INSTANCE_ID=$(
         aws ec2 describe-instances \
-        --filters "Name=tag:Name,Values=$instance" "Name=instance-state-name,Values=pending,running,stopped,stopping" \
+        --filters "Name=tag:Name,Values=$instance" \
+                  "Name=instance-state-name,Values=pending,running,stopped,stopping" \
         --query 'Reservations[].Instances[].InstanceId' \
         --output text
     )
@@ -25,61 +22,53 @@ do
     else
         echo "Creating instance '$instance'..."
 
+        INSTANCE_ID=$(
+            aws ec2 run-instances \
+            --image-id "$AMI_ID" \
+            --instance-type "t3.micro" \
+            --security-group-ids "$SG_ID" \
+            --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance}]" \
+            --query 'Instances[0].InstanceId' \
+            --output text
+        )
+    fi
 
-   INSTANCE_ID=$( aws ec2 run-instances \
-    --image-id $AMI_ID \
-    --instance-type "t3.micro" \
-    --security-group-ids $SG_ID \
-    --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance}]" \
-    --query 'Instances[0].InstanceId' \
-    --output text )
+    aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
 
-    if [ "$INSTANCE" == "frontend" ]; then
+    if [ "$instance" = "frontend" ]; then
         IP=$(
             aws ec2 describe-instances \
-            --instance-ids $INSTANCE_ID \
+            --instance-ids "$INSTANCE_ID" \
             --query 'Reservations[0].Instances[0].PublicIpAddress' \
             --output text
-     )
-  else
+        )
+    else
         IP=$(
             aws ec2 describe-instances \
-            --instance-ids $INSTANCE_ID \
+            --instance-ids "$INSTANCE_ID" \
             --query 'Reservations[0].Instances[0].PrivateIpAddress' \
             --output text
-     )
-        RECORD_NAME="$instance.$DOMAIN"  # mongodb.agrigrow.online
-
-  fi
+        )
+    fi
 
     echo "IP Address $instance: $IP"
-    
-aws route53 change-resource-record-sets \
-    --hosted-zone-id $ZONE_ID \
-    --change-batch '
-    {
-        "Comment": "Updating record",
-        "Changes": [
-            {
-            "Action": "UPSERT",
-            "ResourceRecordSet": {
-                "Name": "'$RECORD_NAME'",
-                "Type": "A",
-                "TTL": 1,
-                "ResourceRecords": [
-                {
-                    "Value": "'$IP'"
+
+    RECORD_NAME="$instance.$DOMAIN"
+
+    aws route53 change-resource-record-sets \
+        --hosted-zone-id "$ZONE_ID" \
+        --change-batch "{
+            \"Comment\": \"Updating record\",
+            \"Changes\": [{
+                \"Action\": \"UPSERT\",
+                \"ResourceRecordSet\": {
+                    \"Name\": \"$RECORD_NAME\",
+                    \"Type\": \"A\",
+                    \"TTL\": 1,
+                    \"ResourceRecords\": [{ \"Value\": \"$IP\" }]
                 }
-                ]
-            }
-            }
-        ]
-    }
-    '
+            }]
+        }"
 
-    echo "record updated for $instance"
-
-    done
-
-
-
+    echo "Record updated for $instance"
+done
