@@ -36,7 +36,7 @@ do
 
     echo "Instance $instance created with ID: $INSTANCE_ID and IP: $IP"
     RECORD_NAME="$instance.$DOMAIN"  # mongodb.agrigrow.online
-done
+
 
 aws route53 change-resource-record-sets \
     --hosted-zone-id $ZONE_ID \
@@ -64,5 +64,6 @@ aws route53 change-resource-record-sets \
     echo "record updated for $instance"
 
 done
+
 
 
