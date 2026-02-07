@@ -2,6 +2,8 @@
 
 SG_ID="sg-047414b5251141a52"
 AMI_ID="ami-0220d79f3f480ecf5"
+ZONE_ID="Z071611922ZYBGR7XJDHT"
+DOMAIN="agrigrow.online"
 # Create a new EC2 instance
 
 
@@ -33,6 +35,34 @@ do
   fi
 
     echo "Instance $instance created with ID: $INSTANCE_ID and IP: $IP"
+    RECORD_NAME="$instance.$DOMAIN"  # mongodb.agrigrow.online
+done
+
+aws route53 change-resource-record-sets \
+    --hosted-zone-id $ZONE_ID \
+    --change-batch '
+    {
+        "Comment": "Updating record",
+        "Changes": [
+            {
+            "Action": "UPSERT",
+            "ResourceRecordSet": {
+                "Name": "'$RECORD_NAME'",
+                "Type": "A",
+                "TTL": 1,
+                "ResourceRecords": [
+                {
+                    "Value": "'$IP'"
+                }
+                ]
+            }
+            }
+        ]
+    }
+    '
+
+    echo "record updated for $instance"
+
 done
 
 
