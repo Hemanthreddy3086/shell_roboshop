@@ -48,12 +48,12 @@ do
             --query 'Reservations[0].Instances[0].PrivateIpAddress' \
             --output text
      )
+        RECORD_NAME="$instance.$DOMAIN"  # mongodb.agrigrow.online
+
   fi
 
     echo "IP Address $instance: $IP"
-    RECORD_NAME="$instance.$DOMAIN"  # mongodb.agrigrow.online
-
-
+    
 aws route53 change-resource-record-sets \
     --hosted-zone-id $ZONE_ID \
     --change-batch '
@@ -79,7 +79,7 @@ aws route53 change-resource-record-sets \
 
     echo "record updated for $instance"
 
-done
+    done
 
 
 
