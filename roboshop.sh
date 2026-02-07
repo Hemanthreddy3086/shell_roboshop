@@ -8,16 +8,6 @@ AMI_ID="ami-0220d79f3f480ecf5"
 for instance in $@
 do  
 
-INSTANCE_NAME="your_instance_name"
-INSTANCE_CHECK=$(your_command_to_check_instance "$INSTANCE")
-
-if [ -z "$INSTANCE_CHECK" ]; then
-    echo "Instance does not exist. Creating..."
-    # Your instance creation command here
-    your_create_instance_command "$INSTANCE"
-else
-    echo "Instance already exists. Skipping creation."
-fi
    INSTANCE_ID=$( aws ec2 run-instances \
     --image-id $AMI_ID \
     --instance-type "t3.micro" \
