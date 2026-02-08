@@ -8,7 +8,7 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
 SCRIPT_DIR=$PWD
-MONGODB_HOST=agrigrow.online
+MONGODB_HOST=mongodb.agrigrow.online
 
 if [ $USERID -ne 0 ]; then
     echo -e "$R Please run this script with root user access $N" | tee -a $LOGS_FILE
@@ -74,7 +74,7 @@ dnf install mongodb-mongosh -y &>>$LOGS_FILE
 
 INDEX=$(mongosh --host $MONGODB_HOST --quiet  --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
 
-if [ $INDEX -eq 0 ]; then
+if [ "$INDEX" -eq 0 ]; then
     mongosh --host $MONGODB_HOST </app/db/master-data.js
     VALIDATE $? "Loading products"
 else
