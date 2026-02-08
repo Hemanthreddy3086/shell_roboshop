@@ -55,18 +55,18 @@ rm -rf /app/*
 VALIDATE $? "Removing existing code"
 
 unzip /tmp/catalogue.zip &>>$LOGS_FILE
-VALIDATE $? "Uzip catalogue code"
+VALIDATE $? "Unzip catalogue code"
 
 npm install  &>>$LOGS_FILE
 VALIDATE $? "Installing dependencies"
 
-cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service
+cp $SCRIPT_DIR/catalougue.service /etc/systemd/system/catalougue.service
 VALIDATE $? "Created systemctl service"
 
 systemctl daemon-reload
-systemctl enable catalogue  &>>$LOGS_FILE
-systemctl start catalogue
-VALIDATE $? "Starting and enabling catalogue"
+systemctl enable catalougue  &>>$LOGS_FILE
+systemctl start catalougue
+VALIDATE $? "Starting and enabling catalougue"
 
 cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
 dnf install mongodb-mongosh -y &>>$LOGS_FILE
