@@ -24,6 +24,6 @@ do
     fi
 done <<< $DISK_USAGE
 
-echo -e "$MESSAGE"
+echo -e "$MESSAGE /n $R High Disk Usage Alert on $IP_ADDRESS $N"
 
 sh mail.sh "hemanthreddy0635@gmail.com" "High Disk Usage Alert on $IP_ADDRESS" "$MESSAGE" "HIGH_DISK_USAGE" "$IP_ADDRESS" "DevOps Team"
